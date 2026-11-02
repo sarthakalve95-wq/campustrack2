@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusTrack - School Lost & Found</title>
+    <script>
+        // =========================================================================
+        // ⬇️ PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL RIGHT HERE INSIDE QUOTES ⬇️
+        // =========================================================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAxO-C9PBp3DrBJ2c3KeE9ZawELO-r2Y31xHJQrIFkUFOXqaZ7Pv7dT66QB5EmHTgm/exec";
+        // =========================================================================
+    </script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; }
+        header { background-color: #1e293b; border-bottom: 1px solid #334155; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 40; }
+        .logo-area { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .logo-icon { background-color: #10b981; color: #0f172a; padding: 10px; border-radius: 10px; font-weight: bold; }
+        nav { display: flex; gap: 6px; background: rgba(15, 23, 42, 0.5); padding: 4px; border-radius: 12px; border: 1px solid #334155; flex-wrap: wrap; }
+        nav button { background: transparent; border: none; color: #cbd5e1; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: 0.2s; }
+        nav button.active, nav button:hover { background-color: #059669; color: white; }
+        .container { max-width: 1200px; width: 100%; margin: 0 auto; padding: 24px; flex-grow: 1; }
+        .hero { background: linear-gradient(135deg, rgba(6, 78, 59, 0.4), #1e293b, rgba(49, 46, 129, 0.4)); border: 1px solid #334155; border-radius: 24px; padding: 40px; margin-bottom: 30px; }
+        .hero h2 { font-size: 36px; margin-bottom: 12px; color: white; }
+        .hero h2 span { color: #34d399; }
+        .hero p { color: #94a3b8; font-size: 16px; margin-bottom: 24px; line-height: 1.5; }
+        .btn-primary { background-color: #10b981; color: #0f172a; padding: 12px 24px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 15px; }
+        .btn-primary:hover { background-color: #059669; color: white; }
+        .btn-secondary { background-color: #3b82f6; color: white; padding: 8px 16px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 16px; }
+        .badge-blue { background: rgba(30, 58, 138, 0.5); border: 1px solid #3b82f6; color: #bfdbfe; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; }
+        .badge-red { background: rgba(127, 29, 29, 0.5); border: 1px solid #ef4444; color: #fecaca; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; }
+        .badge-green { background: rgba(6, 78, 59, 0.5); border: 1px solid #10b981; color: #a7f3d0; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; }
+        .badge-yellow { background: rgba(120, 53, 15, 0.5); border: 1px solid #f59e0b; color: #fde68a; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; }
+        .form-box { background: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 30px; max-width: 600px; margin: 0 auto; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 500; color: #cbd5e1; margin-bottom: 8px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 12px; color: white; font-size: 15px; outline: none; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #10b981; }
+        .hidden { display: none !important; }
+        .points-box { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #f59e0b; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+        .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 16px; background: #1e293b; border-radius: 16px; overflow: hidden; border: 1px solid #334155; }
+        .leaderboard-table th, .leaderboard-table td { padding: 16px; text-align: left; }
+        .leaderboard-table th { background: #0f172a; color: #94a3b8; font-size: 13px; text-transform: uppercase; }
+        .leaderboard-table tr:not(:last-child) { border-bottom: 1px solid #334155; }
+        .rank-badge { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; font-size: 14px; }
+        .rank-1 { background: #f59e0b; color: #0f172a; }
+        .rank-2 { background: #94a3b8; color: #0f172a; }
+        .rank-3 { background: #b45309; color: white; }
+    
+        .tabs-row { display:flex; gap:6px; margin-bottom:16px; background:#0f172a; padding:4px; border-radius:10px; }
+        .tabs-row button { flex:1; background:transparent; border:none; color:#cbd5e1; padding:8px; border-radius:8px; cursor:pointer; font-weight:600; }
+        .tabs-row button.on { background:#059669; color:white; }
+        .err { color:#fca5a5; font-size:13px; margin-bottom:12px; min-height:16px; }
+        .btn-ghost { background:transparent; border:1px solid #475569; color:#cbd5e1; padding:6px 12px; border-radius:10px; cursor:pointer; font-size:12px; }
+        @media (max-width: 700px) {
+            header { flex-direction: column; align-items: stretch; gap: 10px; padding: 10px 12px; position: static; }
+            .logo-area { justify-content: center; }
+            nav { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            nav button { white-space: nowrap; padding: 8px 12px; flex-shrink: 0; }
+            .points-box { justify-content: space-between; flex-wrap: wrap; border-radius: 14px; }
+            .container { padding: 14px; }
+            .hero { padding: 22px 18px; border-radius: 18px; }
+            .hero h2 { font-size: 24px; }
+            .hero p { font-size: 14px; }
+            .hero .btn-primary, .hero .btn-secondary { width: 100%; padding: 12px; font-size: 14px; }
+            .form-box { padding: 18px; border-radius: 16px; }
+            .grid-4 { grid-template-columns: 1fr; }
+            .leaderboard-table th, .leaderboard-table td { padding: 10px 6px; font-size: 13px; }
+            .leaderboard-table th { font-size: 11px; }
+            #tab-inventory > div:first-child, #tab-catalog > div:first-child { flex-direction: column; align-items: stretch !important; }
+            [id^="modal-"] { padding: 12px; }
+            input, select, textarea { font-size: 16px !important; }
+        }
+</style>
+</head>
+<body>
+    <header>
+        <div class="logo-area" onclick="switchTab('home')">
+            <div class="logo-icon">📦</div>
+            <div>
+                <h1 style="font-size: 16px; color: white;">CampusTrack</h1>
+                <p style="font-size: 11px; color: #94a3b8;">School Lost & Found Portal</p>
+            </div>
+        </div>
+        <nav>
+            <button onclick="switchTab('home')" id="nav-home" class="active">Home</button>
+            <button onclick="switchTab('report-lost')" id="nav-report-lost">Report Lost</button>
+            <button onclick="switchTab('report-found')" id="nav-report-found">Report Found</button>
+            <button onclick="switchTab('catalog')" id="nav-catalog">Found Catalog</button>
+            <button onclick="switchTab('leaderboard')" id="nav-leaderboard">🏆 Leaderboard</button>
+            <button onclick="switchTab('inventory')" id="nav-inventory">My Inventory</button>
+        </nav>
+        <div class="points-box">
+            <span id="user-display-name">👤 Guest</span>
+            <span id="user-points" style="color: #f59e0b;">⭐ 0 Pts</span>
+            <button onclick="logout()" class="btn-ghost hidden" id="logout-btn">Log out</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="tab-home" class="tab-content">
+            <div class="hero">
+                <h2>Lost Something on Campus?<br><span>We'll help you find it securely.</span></h2>
+                <p>Register items to get 4-digit security codes or return found items to climb the live global Cloud Leaderboard!</p>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn-primary" onclick="switchTab('report-found')">Report Found Item (+50 Pts)</button>
+                    <button class="btn-secondary" onclick="switchTab('inventory')">Manage My Inventory</button>
+                </div>
+            </div>
+            <div class="form-box" id="home-auth" style="max-width: 100%; margin-bottom: 30px;">
+                <h3 style="font-size: 18px; color: white; margin-bottom: 14px;">Student Account</h3>
+                <div class="tabs-row">
+                    <button type="button" id="auth-tab-signup" class="on" onclick="setAuthMode('signup')">Create Account</button>
+                    <button type="button" id="auth-tab-login" onclick="setAuthMode('login')">Log In</button>
+                </div>
+                <form onsubmit="handleAccountSubmit(event)">
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 1; min-width: 180px;"><label>Full Name / Username *</label><input type="text" id="auth-name" required placeholder="e.g. Alex Smith" autocomplete="username"></div>
+                        <div class="form-group" id="auth-id-group" style="flex: 1; min-width: 180px;"><label>Student ID *</label><input type="text" id="auth-studentid" required placeholder="e.g. 1" autocomplete="off"></div>
+                        <div class="form-group" style="flex: 1; min-width: 180px;"><label>Password * (min 4 characters)</label><input type="password" id="auth-password" required minlength="4" placeholder="Choose a password" autocomplete="new-password"></div>
+                    </div>
+                    <div class="err" id="auth-error"></div>
+                    <button type="submit" id="auth-submit" class="btn-primary" style="width: 100%;">Create Account</button>
+                </form>
+            </div>
+            <h3 style="margin-bottom: 16px; font-size: 18px;">Item Categories & Color Coding</h3>
+            <div class="grid-4">
+                <div class="card"><span style="font-size: 24px;">🔵</span><div><h4 style="color: #bfdbfe; font-size: 15px;">Electronic Devices</h4><p style="font-size: 12px; color: #94a3b8;">Laptops, phones</p></div></div>
+                <div class="card"><span style="font-size: 24px;">🔴</span><div><h4 style="color: #fecaca; font-size: 15px;">Books</h4><p style="font-size: 12px; color: #94a3b8;">Textbooks, diaries</p></div></div>
+                <div class="card"><span style="font-size: 24px;">🟢</span><div><h4 style="color: #a7f3d0; font-size: 15px;">Stationery</h4><p style="font-size: 12px; color: #94a3b8;">Pouches, pens</p></div></div>
+                <div class="card"><span style="font-size: 24px;">🟡</span><div><h4 style="color: #fde68a; font-size: 15px;">Personal Items</h4><p style="font-size: 12px; color: #94a3b8;">Bags, jackets</p></div></div>
+            </div>
+        </section>
+
+        <section id="tab-report-lost" class="tab-content hidden">
+            <div class="form-box">
+                <h2 style="font-size: 22px; margin-bottom: 6px;">Report a Lost Item</h2>
+                <p style="font-size: 13px; color: #94a3b8; margin-bottom: 20px;">Syncs directly to Google Sheets database.</p>
+                <form id="form-report-lost" onsubmit="handleReportLost(event)">
+                    <div class="form-group"><label>Item Title *</label><input type="text" id="lost-title" required placeholder="e.g. Black Dell Laptop Bag"></div>
+                    <div class="form-group"><label>Category *</label>
+                        <select id="lost-category" required>
+                            <option value="Electronic devices">🔵 Electronic devices</option>
+                            <option value="Books">🔴 Books</option>
+                            <option value="Stationery">🟢 Stationery</option>
+                            <option value="Personal belongings">🟡 Personal belongings</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Location Lost</label><input type="text" id="lost-location" placeholder="e.g. Library"></div>
+                    <div class="form-group"><label>Description *</label><textarea id="lost-description" required rows="3" placeholder="Provide details..."></textarea></div>
+                    <button type="submit" id="lost-submit-btn" class="btn-primary" style="width: 100%;">Submit Lost Report</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="tab-report-found" class="tab-content hidden">
+            <div class="form-box">
+                <h2 style="font-size: 22px; margin-bottom: 6px;">Report a Found Item</h2>
+                <p style="font-size: 13px; color: #94a3b8; margin-bottom: 20px;">Syncs to Google Sheet & adds +50 global points!</p>
+                <form id="form-report-found" onsubmit="handleReportFound(event)">
+                    <div class="form-group"><label>Item Name *</label><input type="text" id="found-title" required placeholder="e.g. Calculator"></div>
+                    <div class="form-group"><label>Category *</label>
+                        <select id="found-category" required>
+                            <option value="Electronic devices">🔵 Electronic devices</option>
+                            <option value="Books">🔴 Books</option>
+                            <option value="Stationery">🟢 Stationery</option>
+                            <option value="Personal belongings">🟡 Personal belongings</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Location Found *</label><input type="text" id="found-location" required placeholder="e.g. Room 104"></div>
+                    <div class="form-group"><label>Photo Upload *</label><input type="file" id="found-photo" accept="image/*" required style="padding: 8px;"></div>
+                    <div class="form-group"><label>Code written on the item (optional)</label><input type="text" id="found-code" maxlength="4" inputmode="numeric" placeholder="4 digits, if you can see one on it"></div>
+                    <div class="form-group"><label>Description</label><textarea id="found-description" rows="2" placeholder="Condition..."></textarea></div>
+                    <button type="submit" id="found-submit-btn" class="btn-primary" style="width: 100%;">Publish to Cloud (+50 Pts)</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="tab-catalog" class="tab-content hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                <h2 style="font-size: 22px;">Cloud Found Catalog</h2>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button onclick="filterCatalog('all')" class="btn-primary" style="padding: 6px 12px; font-size: 12px;">All Items</button>
+                    <button onclick="filterCatalog('Electronic devices')" style="background: rgba(30, 58, 138, 0.5); color: #bfdbfe; border: 1px solid #3b82f6; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;">🔵 Electronic devices</button>
+                    <button onclick="filterCatalog('Books')" style="background: rgba(127, 29, 29, 0.5); color: #fecaca; border: 1px solid #ef4444; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;">🔴 Books</button>
+                    <button onclick="filterCatalog('Stationery')" style="background: rgba(6, 78, 59, 0.5); color: #a7f3d0; border: 1px solid #10b981; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;">🟢 Stationery</button>
+                    <button onclick="filterCatalog('Personal belongings')" style="background: rgba(120, 53, 15, 0.5); color: #fde68a; border: 1px solid #f59e0b; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;">🟡 Personal belongings</button>
+                </div>
+            </div>
+            <div class="grid-4" id="catalog-grid">
+                <div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 40px;">Loading cloud records...</div>
+            </div>
+        </section>
+
+        <section id="tab-leaderboard" class="tab-content hidden">
+            <div style="margin-bottom: 24px;">
+                <h2 style="font-size: 26px; color: white;">🏆 Global Cloud Leaderboard</h2>
+                <p style="color: #94a3b8; font-size: 14px; margin-top: 4px;">Synced live from Google Sheets across all student devices.</p>
+            </div>
+            <table class="leaderboard-table">
+                <thead><tr><th>Rank</th><th>Student Name</th><th>Items Returned</th><th>Total Points</th></tr></thead>
+                <tbody id="leaderboard-body"><tr><td colspan="4" style="text-align: center; color: #94a3b8;">Loading leaderboard...</td></tr></tbody>
+            </table>
+        </section>
+
+        <section id="tab-inventory" class="tab-content hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="font-size: 22px;">My Registered Items Inventory</h2>
+                <button class="btn-primary" onclick="openRegisterModal()">+ Register Item</button>
+            </div>
+            <div class="grid-4" id="inventory-grid"></div>
+        </section>
+    </main>
+
+    <!-- Modal: Register Item -->
+    <div id="modal-register" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index: 50;">
+        <div class="form-box" style="width: 100%; max-width: 400px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 16px;"><h3 style="font-size: 18px; color: white;">Register Item & Get Code</h3><button onclick="closeRegisterModal()" style="background:none; border:none; color:white; cursor:pointer; font-size: 16px;">✕</button></div>
+            <form onsubmit="handleRegisterItem(event)">
+                <div class="form-group"><label>Item Title</label><input type="text" id="reg-title" required placeholder="e.g. Scientific Calculator"></div>
+                <div class="form-group"><label>Category</label>
+                    <select id="reg-category">
+                        <option value="Electronic devices">🔵 Electronic devices</option>
+                        <option value="Books">🔴 Books</option>
+                        <option value="Stationery">🟢 Stationery</option>
+                        <option value="Personal belongings">🟡 Personal belongings</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Features / Distinguishing Marks</label><textarea id="reg-desc" rows="2" placeholder="Stickers, color marks..."></textarea></div>
+                <button type="submit" id="reg-submit" class="btn-primary" style="width: 100%;">Save to Inventory</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Alert -->
+    <div id="modal-alert" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index: 60;">
+        <div class="form-box" style="width: 100%; max-width: 380px; text-align: center;">
+            <h3 id="alert-title" style="font-size: 18px; color: white; margin-bottom: 10px;">Notice</h3>
+            <p id="alert-message" style="font-size: 14px; color: #94a3b8; margin-bottom: 20px; line-height: 1.4; white-space: pre-line;"></p>
+            <button onclick="closeAlertModal()" class="btn-primary" style="width: 100%;">OK</button>
+        </div>
+    </div>
+
+    <!-- Claim code -->
+    <div id="modal-claim" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index: 60;">
+        <div class="form-box" style="width: 100%; max-width: 380px;">
+            <h3 style="font-size: 18px; color: white; margin-bottom: 6px;">🔒 Security Verification</h3>
+            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 16px;">Enter the 4-digit code you got when you registered this item in My Inventory:</p>
+            <div class="form-group">
+                <input type="text" id="claim-code-input" maxlength="4" inputmode="numeric" placeholder="e.g. 4821" style="text-align: center; font-size: 20px; letter-spacing: 4px;">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="closeClaimModal()" class="btn-secondary" style="width: 50%;">Cancel</button>
+                <button onclick="submitClaimCode()" id="claim-verify-btn" class="btn-primary" style="width: 50%;">Verify</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ------------------------------------------------------------------
+           Session storage that survives Google Sites embeds.
+           Tries localStorage, sessionStorage, a cookie and window.name.
+        ------------------------------------------------------------------ */
+        const SESSION_KEY = 'ct_persistent_user_v2';
+        const Store = {
+            set(obj) {
+                const s = JSON.stringify(obj);
+                try { localStorage.setItem(SESSION_KEY, s); } catch (e) {}
+                try { sessionStorage.setItem(SESSION_KEY, s); } catch (e) {}
+                try { document.cookie = SESSION_KEY + '=' + encodeURIComponent(s) + '; max-age=31536000; path=/; SameSite=None; Secure'; } catch (e) {}
+                try { window.name = 'CT::' + s; } catch (e) {}
+            },
+            get() {
+                let s = null;
+                try { s = localStorage.getItem(SESSION_KEY); } catch (e) {}
+                if (!s) { try { s = sessionStorage.getItem(SESSION_KEY); } catch (e) {} }
+                if (!s) { try { const m = document.cookie.match(new RegExp(SESSION_KEY + '=([^;]+)')); if (m) s = decodeURIComponent(m[1]); } catch (e) {} }
+                if (!s) { try { if (window.name && window.name.indexOf('CT::') === 0) s = window.name.slice(4); } catch (e) {} }
+                try { return s ? JSON.parse(s) : null; } catch (e) { return null; }
+            },
+            works() { try { localStorage.setItem('ct_t', '1'); return localStorage.getItem('ct_t') === '1'; } catch (e) { return false; } },
+            clear() {
+                try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+                try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+                try { document.cookie = SESSION_KEY + '=; max-age=0; path=/; SameSite=None; Secure'; } catch (e) {}
+                try { window.name = ''; } catch (e) {}
+            }
+        };
+
+        let currentUser = null;           // null = guest
+        let foundItems = [], cloudUsers = [];
+        let currentFilter = 'all', authMode = 'signup', claimFoundId = null;
+
+        const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const normName = s => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+        const normId = s => String(s || '').trim().toUpperCase().replace(/\s+/g, '');
+
+        function api(payload) {
+            return fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // avoids CORS preflight; response is readable
+                body: JSON.stringify(payload)
+            }).then(r => r.json());
+        }
+        const creds = () => ({ name: currentUser.name, token: currentUser.token });
+
+        function showAlert(title, message) {
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-message').innerText = message;
+            document.getElementById('modal-alert').style.display = 'flex';
+        }
+        function closeAlertModal() { document.getElementById('modal-alert').style.display = 'none'; }
+
+        function requireLogin() {
+            if (currentUser) return true;
+            openAuthModal();
+            setAuthMode('login');
+            document.getElementById('auth-error').innerText = 'Please log in or create an account first.';
+            return false;
+        }
+
+        /* ---------------- Header / session ---------------- */
+        function updateUIUserHeader() {
+            document.getElementById('user-display-name').innerText = currentUser ? `👤 ${currentUser.name}` : '👤 Guest';
+            document.getElementById('user-points').innerText = currentUser ? `⭐ ${currentUser.points} Pts` : '⭐ 0 Pts';
+            document.getElementById('home-auth').classList.toggle('hidden', !!currentUser);
+            document.getElementById('logout-btn').classList.toggle('hidden', !currentUser);
+        }
+        function setUser(u, token) {
+            const prev = currentUser || {};
+            currentUser = { name: u.name, studentId: u.studentId || prev.studentId || '', points: u.points, itemsReturned: u.itemsReturned, token: token || prev.token };
+            Store.set(currentUser);
+            updateUIUserHeader();
+        }
+        function logout() {
+            Store.clear();
+            currentUser = null;
+            updateUIUserHeader();
+            switchTab('home');
+        }
+        function restoreSession() {
+            const saved = Store.get();
+            if (!saved || !saved.name || !saved.token) { updateUIUserHeader(); return; }
+            currentUser = saved;                    // show instantly
+            updateUIUserHeader();
+            api({ action: 'whoami', name: saved.name, token: saved.token })   // then verify with the cloud
+                .then(res => {
+                    if (res.ok) setUser(res.user);
+                    else { Store.clear(); currentUser = null; updateUIUserHeader(); }  // account no longer exists
+                })
+                .catch(() => {});                   // offline: keep the saved session
+        }
+
+        /* ---------------- Account modal ---------------- */
+        function openAuthModal() { switchTab('home'); document.getElementById('auth-error').innerText = ''; const c = document.getElementById('home-auth'); if (c.scrollIntoView) c.scrollIntoView({ behavior: 'smooth' }); }
+        function closeAuthModal() {}
+        function setAuthMode(mode) {
+            authMode = mode;
+            document.getElementById('auth-tab-signup').classList.toggle('on', mode === 'signup');
+            document.getElementById('auth-tab-login').classList.toggle('on', mode === 'login');
+            document.getElementById('auth-submit').innerText = mode === 'signup' ? 'Create Account' : 'Log In';
+            document.getElementById('auth-id-group').classList.toggle('hidden', mode === 'login');
+            document.getElementById('auth-studentid').required = (mode === 'signup');
+            document.getElementById('auth-password').autocomplete = mode === 'signup' ? 'new-password' : 'current-password';
+            document.getElementById('auth-error').innerText = '';
+        }
+        function handleAccountSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('auth-submit'), err = document.getElementById('auth-error');
+            const name = document.getElementById('auth-name').value.trim();
+            const studentId = document.getElementById('auth-studentid').value.trim();
+            const password = document.getElementById('auth-password').value;
+            btn.disabled = true; err.innerText = '';
+            api({ action: authMode, name, studentId, password }).then(res => {
+                btn.disabled = false;
+                if (!res.ok) { err.innerText = res.error || ('Unexpected reply from server: ' + JSON.stringify(res).slice(0, 160)); return; }
+                setUser(res.user, res.token);
+                closeAuthModal();
+                e.target.reset();
+                if (!Store.works()) setTimeout(() => showAlert('Heads up', 'Your browser blocks saving login inside this page, so you may need to log in again after reloading. Chrome can remember your password to make this one click.'), 300);
+                showAlert(authMode === 'signup' ? 'Account Created' : 'Welcome back!', `Hello, ${res.user.name}!`);
+                renderInventory();
+            }).catch(() => { btn.disabled = false; err.innerText = 'Could not reach the server. Check your connection and try again.'; });
+        }
+
+        /* ---------------- Cloud data ---------------- */
+        function fetchCloudData() {
+            fetch(SCRIPT_URL + '?t=' + Date.now())
+                .then(res => res.json())
+                .then(data => {
+                    foundItems = (data.foundItems || []).slice().reverse();
+                    cloudUsers = data.users || [];
+                    if (currentUser) {
+                        const me = cloudUsers.find(u => normName(u.name) === normName(currentUser.name));
+                        if (me) setUser(me);
+                    }
+                    renderCatalog(currentFilter);
+                    if (!document.getElementById('tab-leaderboard').classList.contains('hidden')) renderLeaderboard();
+                })
+                .catch(err => console.error('Cloud fetch error:', err));
+        }
+
+        function getBadgeClass(category) {
+            switch (category) {
+                case 'Electronic devices': return 'badge-blue';
+                case 'Books': return 'badge-red';
+                case 'Stationery': return 'badge-green';
+                default: return 'badge-yellow';
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) activeBtn.classList.add('active');
+            if (tabId === 'catalog' || tabId === 'leaderboard') fetchCloudData();
+            if (tabId === 'inventory') renderInventory();
+        }
+
+        /* ---------------- Leaderboard ---------------- */
+        function renderLeaderboard() {
+            const body = document.getElementById('leaderboard-body');
+            const list = [...cloudUsers].sort((a, b) => b.points - a.points);
+            if (list.length === 0) {
+                body.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 20px;">No leaderboard records yet.</td></tr>`;
+                return;
+            }
+            body.innerHTML = list.map((item, index) => {
+                let rank = index + 1;
+                if (index < 3) rank = `<span class="rank-badge rank-${index + 1}">${index + 1}</span>`;
+                const you = currentUser && normName(item.name) === normName(currentUser.name);
+                return `<tr>
+                    <td>${rank}</td>
+                    <td style="font-weight: bold; color: white;">${esc(item.name)} ${you ? '<span style="font-size:11px; color:#10b981;">(You)</span>' : ''}</td>
+                    <td>${item.itemsReturned || 0} items</td>
+                    <td style="font-weight: bold; color: #f59e0b;">⭐ ${item.points || 0} Pts</td>
+                </tr>`;
+            }).join('');
+        }
+
+        /* ---------------- Inventory (stored in the cloud) ---------------- */
+        function openRegisterModal() { if (requireLogin()) document.getElementById('modal-register').style.display = 'flex'; }
+        function closeRegisterModal() { document.getElementById('modal-register').style.display = 'none'; }
+
+        function handleRegisterItem(e) {
+            e.preventDefault();
+            const btn = document.getElementById('reg-submit');
+            btn.disabled = true;
+            api({ action: 'registerItem', ...creds(),
+                  title: document.getElementById('reg-title').value,
+                  category: document.getElementById('reg-category').value,
+                  desc: document.getElementById('reg-desc').value })
+            .then(res => {
+                btn.disabled = false;
+                if (!res.ok) { showAlert('Error', res.error); return; }
+                closeRegisterModal();
+                e.target.reset();
+                renderInventory();
+                showAlert('Item Registered!', `Your 4-Digit Security Code is: ${res.item.code}\nKeep this safe to claim your item if lost!`);
+            }).catch(() => { btn.disabled = false; showAlert('Error', 'Could not reach the server.'); });
+        }
+
+        function renderInventory() {
+            const grid = document.getElementById('inventory-grid');
+            if (!currentUser) {
+                grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 40px;">Log in to see your registered items.</div>`;
+                return;
+            }
+            grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 40px;">Loading your items...</div>`;
+            api({ action: 'getInventory', ...creds() }).then(res => {
+                if (!res.ok) { grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #fca5a5; padding: 40px;">${esc(res.error)}</div>`; return; }
+                if (res.items.length === 0) {
+                    grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 40px;">No registered items yet. Click "+ Register Item" to protect your belongings and get a 4-digit code.</div>`;
+                    return;
+                }
+                grid.innerHTML = res.items.reverse().map(item => `
+                    <div class="card" style="flex-direction: column; align-items: flex-start;">
+                        <span class="${getBadgeClass(item.category)}">${esc(item.category)}</span>
+                        <h4 style="margin-top: 10px; color: white;">${esc(item.title)}</h4>
+                        <p style="font-size: 13px; color: #34d399; font-family: monospace; font-weight: bold;">🔒 Security Code: ${esc(item.code)}</p>
+                        <p style="font-size: 11px; color: #94a3b8;">Write this code on a sticker or inside the item.</p>
+                        <p style="font-size: 12px; color: ${item.status === 'Recovered' ? '#34d399' : '#94a3b8'};">${item.status === 'Recovered' ? '✅ Recovered' : '📌 Registered'}</p>
+                        <p style="font-size: 12px; color: #94a3b8;">${esc(item.desc)}</p>
+                    </div>`).join('');
+            }).catch(() => { grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #fca5a5; padding: 40px;">Could not reach the server.</div>`; });
+        }
+
+        /* ---------------- Reports ---------------- */
+        function handleReportLost(e) {
+            e.preventDefault();
+            if (!requireLogin()) return;
+            const btn = document.getElementById('lost-submit-btn');
+            btn.disabled = true; btn.innerText = 'Syncing to Cloud...';
+            api({ action: 'reportLost', ...creds(),
+                  title: document.getElementById('lost-title').value,
+                  category: document.getElementById('lost-category').value,
+                  location: document.getElementById('lost-location').value,
+                  desc: document.getElementById('lost-description').value })
+            .then(res => {
+                btn.disabled = false; btn.innerText = 'Submit Lost Report';
+                if (!res.ok) { showAlert('Error', res.error); return; }
+                showAlert('Success', 'Your lost item report has been sent to Google Sheets.');
+                document.getElementById('form-report-lost').reset();
+                switchTab('catalog');
+            }).catch(() => { btn.disabled = false; btn.innerText = 'Submit Lost Report'; showAlert('Error', 'Could not reach the server.'); });
+        }
+
+        // Shrink the photo so it fits in one Google Sheets cell (limit ~50,000 chars)
+        function compressImage(file, startDim, limit) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onerror = reject;
+                reader.onload = ev => {
+                    const img = new Image();
+                    img.onerror = reject;
+                    img.onload = () => {
+                        let dim = startDim, q = 0.8, out = '';
+                        for (let i = 0; i < 8; i++) {
+                            const scale = Math.min(1, dim / Math.max(img.width, img.height));
+                            const c = document.createElement('canvas');
+                            c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+                            c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                            out = c.toDataURL('image/jpeg', q);
+                            if (out.length < limit) break;
+                            q = Math.max(0.35, q - 0.1); dim = Math.round(dim * 0.8);
+                        }
+                        resolve(out);
+                    };
+                    img.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function handleReportFound(e) {
+            e.preventDefault();
+            if (!requireLogin()) return;
+            const btn = document.getElementById('found-submit-btn');
+            btn.disabled = true; btn.innerText = 'Syncing to Cloud...';
+            const pf = document.getElementById('found-photo').files[0];
+            compressImage(pf, 900, 130000).then(photo =>
+                api({ action: 'reportFound', ...creds(),
+                      title: document.getElementById('found-title').value,
+                      category: document.getElementById('found-category').value,
+                      location: document.getElementById('found-location').value,
+                      desc: document.getElementById('found-description').value,
+                      code: document.getElementById('found-code').value.trim(),
+                      photo })
+            ).then(res => {
+                btn.disabled = false; btn.innerText = 'Publish to Cloud (+50 Pts)';
+                if (!res.ok) { showAlert('Error', res.error); return; }
+                setUser(res.user);
+                showAlert('Success!', 'Item published and +50 points added!');
+                document.getElementById('form-report-found').reset();
+                switchTab('catalog');
+            }).catch(() => { btn.disabled = false; btn.innerText = 'Publish to Cloud (+50 Pts)'; showAlert('Error', 'Could not upload. Please try again.'); });
+        }
+
+        /* ---------------- Catalog + claiming ---------------- */
+        function filterCatalog(cat) { currentFilter = cat; renderCatalog(cat); }
+
+        function renderCatalog(filter) {
+            const grid = document.getElementById('catalog-grid');
+            const open = foundItems.filter(i => i.status !== 'Claimed');
+            const items = filter === 'all' ? open : open.filter(i => i.category === filter);
+            if (items.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 40px;">No items found in this category.</div>`;
+                return;
+            }
+            grid.innerHTML = items.map(item => `
+                <div style="background: #1e293b; border: 1px solid #334155; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        ${item.photo ? `<img src="${esc(item.photo)}" referrerpolicy="no-referrer" loading="lazy" style="width: 100%; height: 160px; object-fit: cover;">` : `<div style="width: 100%; height: 160px; background: #0f172a; display: flex; align-items: center; justify-content: center; color: #475569; font-size: 13px;">No Image Provided</div>`}
+                        <div style="padding: 16px;">
+                            <div style="margin-bottom: 8px;"><span class="${getBadgeClass(item.category)}">${esc(item.category || 'Personal belongings')}</span>${item.hasCode === 'yes' ? ' <span class="badge-green">🔖 Has owner code</span>' : ''}</div>
+                            <h4 style="font-size: 16px; color: white; margin-bottom: 6px;">${esc(item.title || 'Untitled Item')}</h4>
+                            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 6px;">📍 ${esc(item.location || 'Campus')} | By: ${esc(item.reporter || 'Anonymous')}</p>
+                            <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 14px;">${esc(item.desc)}</p>
+                        </div>
+                    </div>
+                    <div style="padding: 0 16px 16px 16px;">
+                        <button onclick="claimItemPrompt('${esc(item.id)}')" class="btn-secondary" style="width: 100%; font-size: 13px;">🔒 Claim with 4-Digit Code</button>
+                    </div>
+                </div>`).join('');
+        }
+
+        function claimItemPrompt(foundId) {
+            if (!requireLogin()) return;
+            claimFoundId = foundId;
+            document.getElementById('claim-code-input').value = '';
+            document.getElementById('modal-claim').style.display = 'flex';
+            document.getElementById('claim-code-input').focus();
+        }
+        function closeClaimModal() { document.getElementById('modal-claim').style.display = 'none'; }
+
+        function submitClaimCode() {
+            const code = document.getElementById('claim-code-input').value.trim();
+            if (!/^\d{4}$/.test(code)) { showAlert('Invalid Code', 'Please enter exactly 4 digits.'); return; }
+            const btn = document.getElementById('claim-verify-btn');
+            btn.disabled = true;
+            api({ action: 'claim', ...creds(), foundId: claimFoundId, code })
+            .then(res => {
+                btn.disabled = false;
+                closeClaimModal();
+                if (!res.ok) { showAlert('❌ Access Denied', res.error); return; }
+                showAlert('✅ Verification Successful!',
+                    `Your code matches "${res.registeredTitle}".\nThe item was found by ${res.finderName} (ID: ${res.finderId}) at ${res.location}.\nContact them or the school office to collect it.`);
+                fetchCloudData();
+            }).catch(() => { btn.disabled = false; closeClaimModal(); showAlert('Error', 'Could not reach the server.'); });
+        }
+
+        window.onload = function () {
+            updateUIUserHeader();
+            restoreSession();
+            fetchCloudData();
+        };
+    </script>
+</body>
+</html>
